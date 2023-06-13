@@ -524,3 +524,4 @@ Temporary Items
 api/docs/swagger.yaml
 api/docs/docs.go
 /vendor
+/cert/
