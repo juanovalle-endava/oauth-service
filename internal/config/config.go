@@ -11,6 +11,15 @@ type Config struct {
 	PrivateKeyPath       string `mapstructure:"private-key-path"`
 	PublicKeyPath        string `mapstructure:"public-key-path"`
 	TokenDefaultDuration string `mapstructure:"token-default-duration"`
+	DB                   DB     `mapstructure:"db"`
+}
+
+type DB struct {
+	Port     string `mapstructure:"port"`
+	Host     string `mapstructure:"host"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
+	DbName   string `mapstructure:"dbname"`
 }
 
 func NewEnv() Config {
@@ -56,12 +65,32 @@ func ForceMapping(env *Config) {
 	}
 
 	if env.PublicKeyPath == "" {
-		env.PrivateKeyPath = viper.GetString("public-key-path")
+		env.PublicKeyPath = viper.GetString("public-key-path")
 	}
 
 	if env.TokenDefaultDuration == "" {
 		env.TokenDefaultDuration = viper.GetString("token-default-duration")
 	}
+
+	if env.DB.Port == "" {
+		env.DB.Port = viper.GetString("db.port")
+	}
+
+	if env.DB.Username == "" {
+		env.DB.Username = viper.GetString("db.user")
+	}
+
+	if env.DB.Password == "" {
+		env.DB.Password = viper.GetString("db.password")
+	}
+
+	if env.DB.Host == "" {
+		env.DB.Host = viper.GetString("db.host")
+	}
+
+	if env.DB.DbName == "" {
+		env.DB.DbName = viper.GetString("db.dbname")
+	}
 }
 
-var Module = fx.Provide(NewEnv)
+var ConfigModule = fx.Provide(NewEnv)
