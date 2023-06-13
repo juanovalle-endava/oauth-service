@@ -1,6 +1,7 @@
 package token
 
 import (
+	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/juanovalle-endava/oauth-service/internal/config"
 	"github.com/juanovalle-endava/oauth-service/internal/models"
@@ -12,7 +13,7 @@ import (
 
 type Token interface {
 	CreateToken(customerID string) (string, error)
-	VerifyToken(token string) (*models.TokenPayload, error)
+	VerifyToken(token string) error
 }
 
 type token struct {
@@ -54,9 +55,40 @@ func (t *token) CreateToken(clientId string) (string, error) {
 	return token, err
 }
 
-func (t *token) VerifyToken(token string) (*models.TokenPayload, error) {
-	//TODO implement me
-	panic("implement me")
+func (t *token) VerifyToken(token string) error {
+	pubKeyBytes, err := os.ReadFile(t.config.PublicKeyPath)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+
+	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pubKeyBytes)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+
+	keyFunc := func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodRSA)
+		if !ok {
+			return nil, fmt.Errorf("invalid token")
+		}
+		return pubKey, nil
+	}
+
+	jwtToken, err := jwt.ParseWithClaims(token, &models.TokenPayload{}, keyFunc)
+	if err != nil {
+		log.Fatalln(err)
+		return err
+	}
+
+	if !jwtToken.Valid {
+		err := fmt.Errorf("token signature is invalid")
+		log.Fatalln(err)
+		return err
+	}
+
+	return nil
 }
 
 func NewTokenCreator(config config.Config) Token {

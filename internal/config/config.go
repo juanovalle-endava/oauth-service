@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Environment          string `mapstructure:"environment"`
 	PrivateKeyPath       string `mapstructure:"private-key-path"`
+	PublicKeyPath        string `mapstructure:"public-key-path"`
 	TokenDefaultDuration string `mapstructure:"token-default-duration"`
 }
 
@@ -52,6 +53,10 @@ func ForceMapping(env *Config) {
 
 	if env.PrivateKeyPath == "" {
 		env.PrivateKeyPath = viper.GetString("private-key-path")
+	}
+
+	if env.PublicKeyPath == "" {
+		env.PrivateKeyPath = viper.GetString("public-key-path")
 	}
 
 	if env.TokenDefaultDuration == "" {
