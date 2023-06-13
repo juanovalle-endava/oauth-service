@@ -46,20 +46,27 @@ func (c *oAuthController) ListTokens(ctx *gin.Context) {
 }
 
 func (c *oAuthController) CreateToken(ctx *gin.Context) {
-	clientId, clientSecret, ok := ctx.Request.BasicAuth()
+	userId, userSecret, ok := ctx.Request.BasicAuth()
 	if !ok {
 		log.Fatalln("there was an error getting the client information")
 		ctx.AbortWithStatus(500)
 		return
 	}
 
-	if clientId != "endava" || clientSecret != "secretpass" {
+	user, err := c.service.GetUserByUserId(userId)
+	if err != nil {
+		log.Fatalln(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	if userId != user.UserId || userSecret != user.Password {
 		log.Fatalln("invalid client or password")
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid client or password"})
 		return
 	}
 
-	token, err := c.token.CreateToken(clientId)
+	token, err := c.token.CreateToken(userId)
 	if err != nil {
 		log.Fatalln(err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
