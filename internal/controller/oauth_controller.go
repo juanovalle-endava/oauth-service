@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/juanovalle-endava/oauth-service/internal/service"
 	"github.com/juanovalle-endava/oauth-service/internal/token"
 	"go.uber.org/fx"
 	"log"
@@ -14,29 +14,38 @@ type VerifyParams struct {
 }
 
 type OAuthController interface {
-	Get(ctx *gin.Context)
+	ListTokens(ctx *gin.Context)
 	CreateToken(ctx *gin.Context)
 	VerifyToken(ctx *gin.Context)
 }
 
 type oAuthController struct {
-	token token.Token
+	token   token.Token
+	service service.OAuthService
 }
 
-func NewOAuthController(token token.Token) OAuthController {
+func NewOAuthController(token token.Token, authService service.OAuthService) OAuthController {
 	return &oAuthController{
-		token: token,
+		token:   token,
+		service: authService,
 	}
 }
 
-func (controller *oAuthController) Get(ctx *gin.Context) {
-	id := ctx.Param("id")
+func (c *oAuthController) ListTokens(ctx *gin.Context) {
+
+	tokens, err := c.service.ListTokens()
+	if err != nil {
+		log.Fatalln(err)
+		ctx.AbortWithStatus(500)
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": fmt.Sprintf("Hello user with id: %s", id),
+		"tokens": tokens,
 	})
 }
 
-func (o *oAuthController) CreateToken(ctx *gin.Context) {
+func (c *oAuthController) CreateToken(ctx *gin.Context) {
 	clientId, clientSecret, ok := ctx.Request.BasicAuth()
 	if !ok {
 		log.Fatalln("there was an error getting the client information")
@@ -46,16 +55,18 @@ func (o *oAuthController) CreateToken(ctx *gin.Context) {
 
 	if clientId != "endava" || clientSecret != "secretpass" {
 		log.Fatalln("invalid client or password")
-		ctx.AbortWithStatus(500)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid client or password"})
 		return
 	}
 
-	token, err := o.token.CreateToken(clientId)
+	token, err := c.token.CreateToken(clientId)
 	if err != nil {
 		log.Fatalln(err)
-		ctx.AbortWithStatus(500)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
+
+	c.service.SaveToken(token)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"token": token,
@@ -63,7 +74,7 @@ func (o *oAuthController) CreateToken(ctx *gin.Context) {
 
 }
 
-func (o *oAuthController) VerifyToken(ctx *gin.Context) {
+func (c *oAuthController) VerifyToken(ctx *gin.Context) {
 	var params VerifyParams
 	if err := ctx.BindJSON(&params); err != nil {
 		log.Fatalln(err)
@@ -71,7 +82,7 @@ func (o *oAuthController) VerifyToken(ctx *gin.Context) {
 		return
 	}
 
-	err := o.token.VerifyToken(params.Token)
+	err := c.token.VerifyToken(params.Token)
 	if err != nil {
 		log.Fatalln(err)
 		ctx.AbortWithStatus(500)

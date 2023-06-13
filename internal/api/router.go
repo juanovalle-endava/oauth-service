@@ -15,7 +15,7 @@ func (api *Api) SetupRoutes() {
 	r := gin.Default()
 
 	apiRoute := r.Group("/api")
-	apiRoute.GET("/:id", api.OAuthController.Get)
+	apiRoute.GET("/token", api.OAuthController.ListTokens)
 	apiRoute.POST("/token", api.OAuthController.CreateToken)
 	apiRoute.POST("/introspect", api.OAuthController.VerifyToken)
 
