@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/juanovalle-endava/oauth-service/internal/api"
+	"github.com/juanovalle-endava/oauth-service/internal/config"
 	"github.com/juanovalle-endava/oauth-service/internal/controller"
+	"github.com/juanovalle-endava/oauth-service/internal/token"
 	"go.uber.org/fx"
 )
 
 var Module = fx.Options(
+	config.Module,
+	token.Module,
 	controller.Module,
 	api.Module,
 	fx.Invoke(bootstrap),

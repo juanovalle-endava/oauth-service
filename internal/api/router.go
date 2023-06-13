@@ -15,6 +15,7 @@ func (api *Api) SetupRoutes() {
 
 	apiRoute := r.Group("/api")
 	apiRoute.GET("/:id", api.OAuthController.Get)
+	apiRoute.POST("/token", api.OAuthController.CreateToken)
 
 	r.Run(":8080")
 

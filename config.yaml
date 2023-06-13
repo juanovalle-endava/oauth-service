@@ -1,0 +1,3 @@
+environment: local
+private-key-path: cert/jwtRS256.key
+token-default-duration: 24h
