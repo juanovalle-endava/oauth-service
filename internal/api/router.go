@@ -1,11 +1,9 @@
 package api
 
 import (
-	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/juanovalle-endava/oauth-service/internal/controller"
 	"go.uber.org/fx"
-	"net/http"
 )
 
 type Api struct {
@@ -13,15 +11,12 @@ type Api struct {
 }
 
 func (api *Api) SetupRoutes() {
-	r := mux.NewRouter()
-	apiRoute := r.PathPrefix("/api").Subrouter().StrictSlash(false)
+	r := gin.Default()
 
-	apiRoute.HandleFunc("/{id}", api.OAuthController.Get).Methods(http.MethodGet)
+	apiRoute := r.Group("/api")
+	apiRoute.GET("/:id", api.OAuthController.Get)
 
-	if err := http.ListenAndServe(":"+"8080", r); err != nil {
-		fmt.Errorf("Failed to listen and serve on port 8080: " + err.Error())
-		panic(err)
-	}
+	r.Run(":8080")
 
 }
 
