@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/juanovalle-endava/oauth-service/internal/controller"
 	"go.uber.org/fx"
+	"log"
 )
 
 type Api struct {
@@ -16,8 +17,12 @@ func (api *Api) SetupRoutes() {
 	apiRoute := r.Group("/api")
 	apiRoute.GET("/:id", api.OAuthController.Get)
 	apiRoute.POST("/token", api.OAuthController.CreateToken)
+	apiRoute.POST("/introspect", api.OAuthController.VerifyToken)
 
-	r.Run(":8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatalln("Failed to listen and serve on port 8080: " + err.Error())
+		panic(err)
+	}
 
 }
 
