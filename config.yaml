@@ -2,9 +2,3 @@ environment: local
 private-key-path: cert/jwtRS256.key
 public-key-path: cert/jwtRS256.key.pub
 token-default-duration: 24h
-db:
-  user: root
-  password: secret
-  host: localhost
-  port: 5432
-  dbname: db

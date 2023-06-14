@@ -11,8 +11,8 @@ import (
 
 func TestNewTokenCreator(t *testing.T) {
 	tokenCreator := NewTokenCreator(config.Config{
-		PrivateKeyPath:       "../../cert/jwtRS256.key",
-		PublicKeyPath:        "../../cert/jwtRS256.key.pub",
+		PrivateKeyPath:       "../mock/mock_jwtRS256.key",
+		PublicKeyPath:        "../mock/mock_jwtRS256.key.pub",
 		TokenDefaultDuration: "24h",
 	})
 
@@ -26,8 +26,8 @@ func TestNewTokenCreator(t *testing.T) {
 
 func TestExpiredJWTToken(t *testing.T) {
 	tokenCreator := NewTokenCreator(config.Config{
-		PrivateKeyPath:       "../../cert/jwtRS256.key",
-		PublicKeyPath:        "../../cert/jwtRS256.key.pub",
+		PrivateKeyPath:       "../mock/mock_jwtRS256.key",
+		PublicKeyPath:        "../mock/mock_jwtRS256.key.pub",
 		TokenDefaultDuration: "-24h",
 	})
 
@@ -42,8 +42,8 @@ func TestExpiredJWTToken(t *testing.T) {
 func TestInvalidJWTTokenAlgNone(t *testing.T) {
 
 	tokenCreator := NewTokenCreator(config.Config{
-		PrivateKeyPath:       "../../cert/jwtRS256.key",
-		PublicKeyPath:        "../../cert/jwtRS256.key.pub",
+		PrivateKeyPath:       "../mock/mock_jwtRS256.key",
+		PublicKeyPath:        "../mock/mock_jwtRS256.key.pub",
 		TokenDefaultDuration: "-24h",
 	})
 
@@ -63,8 +63,8 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 
 func TestInvalidJWTSignedSecret(t *testing.T) {
 	tokenCreator := NewTokenCreator(config.Config{
-		PrivateKeyPath:       "../../cert/jwtRS256.key",
-		PublicKeyPath:        "../../cert/jwtRS256.key.pub",
+		PrivateKeyPath:       "../mock/mock_jwtRS256.key",
+		PublicKeyPath:        "../mock/mock_jwtRS256.key.pub",
 		TokenDefaultDuration: "-24h",
 	})
 
