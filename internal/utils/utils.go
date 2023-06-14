@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/rsa"
 	"encoding/base64"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"net/http"
@@ -10,17 +11,25 @@ import (
 	"strings"
 )
 
-var ()
+const (
+	NoFileFound         = "key err: there was an error trying to retrieve the file, err: %s"
+	KeyParseErr         = "key err: there was an error trying to parse the key, err: %s"
+	ParseDurationErr    = "token err: there was an error trying to parse the duration of the token, err: %s"
+	SingingTokenErr     = "token err: there was an error trying sign the token, err: %s"
+	InvalidTokenErr     = "token err: invalid token, err: %s"
+	JwtParseErr         = "token err: there was an error trying to parse the token, err: %s"
+	InvalidSignatureErr = "token err: token signature is invalid, err: %s"
+)
 
 func GetPrivateKey(path string) (*rsa.PrivateKey, error) {
 	privKeyBytes, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(NoFileFound, err)
 	}
 
 	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(privKeyBytes)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(KeyParseErr, err)
 	}
 
 	return privKey, nil
@@ -29,12 +38,12 @@ func GetPrivateKey(path string) (*rsa.PrivateKey, error) {
 func GetPublicKey(path string) (*rsa.PublicKey, error) {
 	pubKeyBytes, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(NoFileFound, err)
 	}
 
 	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pubKeyBytes)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(NoFileFound, err)
 	}
 	return pubKey, nil
 }
@@ -45,7 +54,8 @@ func AuthMiddleware(accounts gin.Accounts) gin.HandlerFunc {
 
 		if !ok || accounts[username] != password {
 			ctx.Header("WWW-Authenticate", "Basic realm=Restricted")
-			ctx.AbortWithStatus(http.StatusUnauthorized)
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "username or password are incorrect, please try again"})
+			ctx.Abort()
 			return
 		}
 

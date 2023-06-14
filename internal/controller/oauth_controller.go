@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/juanovalle-endava/oauth-service/internal/service"
+	log "github.com/sirupsen/logrus"
 	"go.uber.org/fx"
 	"net/http"
 )
@@ -27,7 +28,8 @@ func (c *oAuthController) ListSigningKeys(ctx *gin.Context) {
 
 	keyResponse, err := c.service.ListSigningKeys()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		log.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -41,12 +43,13 @@ func (c *oAuthController) CreateToken(ctx *gin.Context) {
 
 	token, err := c.service.CreateToken(username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		log.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"data": token,
+		"token": token,
 	})
 
 }
@@ -57,7 +60,8 @@ func (c *oAuthController) VerifyToken(ctx *gin.Context) {
 
 	err := c.service.VerifyToken(tokenString)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		log.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
