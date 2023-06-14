@@ -5,9 +5,8 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/juanovalle-endava/oauth-service/internal/config"
 	"github.com/juanovalle-endava/oauth-service/internal/models"
+	"github.com/juanovalle-endava/oauth-service/internal/utils"
 	"go.uber.org/fx"
-	"log"
-	"os"
 	"time"
 )
 
@@ -21,21 +20,13 @@ type token struct {
 }
 
 func (t *token) CreateToken(clientId string) (string, error) {
-	privKeyBytes, err := os.ReadFile(t.config.PrivateKeyPath)
+	privKey, err := utils.GetPrivateKey(t.config.PrivateKeyPath)
 	if err != nil {
-		log.Fatalln(err)
-		return "", err
-	}
-
-	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(privKeyBytes)
-	if err != nil {
-		log.Fatalln(err)
 		return "", err
 	}
 
 	duration, err := time.ParseDuration(t.config.TokenDefaultDuration)
 	if err != nil {
-		log.Fatalln(err)
 		return "", err
 	}
 
@@ -46,25 +37,17 @@ func (t *token) CreateToken(clientId string) (string, error) {
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS256, payload)
-	token, err := jwtToken.SignedString(privKey)
+	tkn, err := jwtToken.SignedString(privKey)
 	if err != nil {
-		log.Fatalln(err)
 		return "", err
 	}
 
-	return token, err
+	return tkn, err
 }
 
 func (t *token) VerifyToken(token string) error {
-	pubKeyBytes, err := os.ReadFile(t.config.PublicKeyPath)
+	pubKey, err := utils.GetPublicKey(t.config.PublicKeyPath)
 	if err != nil {
-		log.Fatalln(err)
-		return err
-	}
-
-	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(pubKeyBytes)
-	if err != nil {
-		log.Fatalln(err)
 		return err
 	}
 
@@ -78,13 +61,11 @@ func (t *token) VerifyToken(token string) error {
 
 	jwtToken, err := jwt.ParseWithClaims(token, &models.TokenPayload{}, keyFunc)
 	if err != nil {
-		log.Fatalln(err)
 		return err
 	}
 
 	if !jwtToken.Valid {
-		err := fmt.Errorf("token signature is invalid")
-		log.Fatalln(err)
+		err = fmt.Errorf("token signature is invalid")
 		return err
 	}
 

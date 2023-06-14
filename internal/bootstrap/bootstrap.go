@@ -6,7 +6,6 @@ import (
 	"github.com/juanovalle-endava/oauth-service/internal/api"
 	"github.com/juanovalle-endava/oauth-service/internal/config"
 	"github.com/juanovalle-endava/oauth-service/internal/controller"
-	"github.com/juanovalle-endava/oauth-service/internal/repository"
 	"github.com/juanovalle-endava/oauth-service/internal/service"
 	"github.com/juanovalle-endava/oauth-service/internal/token"
 	"go.uber.org/fx"
@@ -14,11 +13,9 @@ import (
 
 var Module = fx.Options(
 	config.ConfigModule,
-	config.DatabaseModule,
 	token.Module,
 	controller.Module,
 	service.Module,
-	repository.Module,
 	api.Module,
 	fx.Invoke(bootstrap),
 )
