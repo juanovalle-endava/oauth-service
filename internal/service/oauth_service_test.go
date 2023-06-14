@@ -13,8 +13,8 @@ func (m *MockTokenCreator) CreateToken(customerID string) (string, error) {
 	return "", nil
 }
 
-func (m *MockTokenCreator) VerifyToken(token string) error {
-	return nil
+func (m *MockTokenCreator) VerifyToken(token string) (*models.TokenPayload, error) {
+	return &models.TokenPayload{}, nil
 }
 
 func TestListSigningKeys(t *testing.T) {

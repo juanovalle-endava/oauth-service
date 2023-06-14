@@ -9,8 +9,8 @@ import (
 )
 
 type OAuthService interface {
-	CreateToken(customerID string) (string, error)
-	VerifyToken(token string) error
+	CreateToken(clientId string) (string, error)
+	VerifyToken(token string) (*models.TokenPayload, error)
 	ListSigningKeys() (models.KeyResponse, error)
 }
 

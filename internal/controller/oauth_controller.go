@@ -58,14 +58,16 @@ func (c *oAuthController) VerifyToken(ctx *gin.Context) {
 
 	tokenString := ctx.GetString("token")
 
-	err := c.service.VerifyToken(tokenString)
+	payload, err := c.service.VerifyToken(tokenString)
 	if err != nil {
 		log.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": payload,
+	})
 
 }
 

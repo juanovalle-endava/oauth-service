@@ -12,7 +12,7 @@ import (
 
 type Token interface {
 	CreateToken(customerID string) (string, error)
-	VerifyToken(token string) error
+	VerifyToken(token string) (*models.TokenPayload, error)
 }
 
 type token struct {
@@ -46,10 +46,10 @@ func (t *token) CreateToken(clientId string) (string, error) {
 	return tkn, err
 }
 
-func (t *token) VerifyToken(token string) error {
+func (t *token) VerifyToken(token string) (*models.TokenPayload, error) {
 	pubKey, err := utils.GetPublicKey(t.config.PublicKeyPath)
 	if err != nil {
-		return err
+		return &models.TokenPayload{}, err
 	}
 
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
@@ -62,15 +62,21 @@ func (t *token) VerifyToken(token string) error {
 
 	jwtToken, err := jwt.ParseWithClaims(token, &models.TokenPayload{}, keyFunc)
 	if err != nil {
-		return fmt.Errorf(utils.JwtParseErr, err)
+		return &models.TokenPayload{}, fmt.Errorf(utils.JwtParseErr, err)
 	}
 
 	if !jwtToken.Valid {
 		err = fmt.Errorf(utils.InvalidSignatureErr, err)
-		return err
+		return &models.TokenPayload{}, err
 	}
 
-	return nil
+	payload, ok := jwtToken.Claims.(*models.TokenPayload)
+	if !ok {
+		return &models.TokenPayload{}, err
+	}
+
+	return payload, nil
+
 }
 
 func NewTokenCreator(config config.Config) Token {
