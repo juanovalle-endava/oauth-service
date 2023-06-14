@@ -15,4 +15,4 @@ kube-deploy:
 kube-service:
 	kubectl apply -f service.yaml
 kube-pf:
-	kubectl port-forward oauth-service-deployment-5697bb97c7-pmlq2 8080:8080
+	kubectl port-forward oauth-service-deployment-5697bb97c7-zxwt7 8080:8080

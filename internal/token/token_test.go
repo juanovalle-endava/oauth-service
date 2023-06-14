@@ -20,8 +20,9 @@ func TestNewTokenCreator(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, tkn)
 
-	err = tokenCreator.VerifyToken(tkn)
+	tokenPayload, err := tokenCreator.VerifyToken(tkn)
 	assert.NoError(t, err)
+	assert.NotEmpty(t, tokenPayload)
 }
 
 func TestExpiredJWTToken(t *testing.T) {
@@ -35,8 +36,9 @@ func TestExpiredJWTToken(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, tkn)
 
-	err = tokenCreator.VerifyToken(tkn)
+	tokenPayload, err := tokenCreator.VerifyToken(tkn)
 	assert.Error(t, err)
+	assert.Empty(t, tokenPayload)
 }
 
 func TestInvalidJWTTokenAlgNone(t *testing.T) {
@@ -57,8 +59,9 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 	tkn, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
 	assert.NoError(t, err)
 
-	err = tokenCreator.VerifyToken(tkn)
+	tokenPayload, err := tokenCreator.VerifyToken(tkn)
 	assert.Error(t, err)
+	assert.Empty(t, tokenPayload)
 }
 
 func TestInvalidJWTSignedSecret(t *testing.T) {
@@ -78,6 +81,7 @@ func TestInvalidJWTSignedSecret(t *testing.T) {
 	tkn, err := jwtToken.SignedString([]byte("testPrivKey"))
 	assert.NoError(t, err)
 
-	err = tokenCreator.VerifyToken(tkn)
+	tokenPayload, err := tokenCreator.VerifyToken(tkn)
 	assert.Error(t, err)
+	assert.Empty(t, tokenPayload)
 }
