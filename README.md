@@ -150,3 +150,4 @@ Some routes require authentication. The following authentication methods are use
 - [UberFx](https://github.com/uber-go/fx)
 - [Gin](https://github.com/gin-gonic-gin)
 - [JWT](https://github.com/golang-jwt/jwt/v4)
+- [Logrus](https://github.com/sirupsen/logrus)

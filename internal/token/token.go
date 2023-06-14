@@ -27,7 +27,7 @@ func (t *token) CreateToken(clientId string) (string, error) {
 
 	duration, err := time.ParseDuration(t.config.TokenDefaultDuration)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf(utils.ParseDurationErr, err)
 	}
 
 	payload := &models.TokenPayload{
@@ -37,9 +37,10 @@ func (t *token) CreateToken(clientId string) (string, error) {
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodRS256, payload)
+
 	tkn, err := jwtToken.SignedString(privKey)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf(utils.SingingTokenErr, err)
 	}
 
 	return tkn, err
@@ -54,18 +55,18 @@ func (t *token) VerifyToken(token string) error {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodRSA)
 		if !ok {
-			return nil, fmt.Errorf("invalid token")
+			return nil, fmt.Errorf(utils.InvalidTokenErr, err)
 		}
 		return pubKey, nil
 	}
 
 	jwtToken, err := jwt.ParseWithClaims(token, &models.TokenPayload{}, keyFunc)
 	if err != nil {
-		return err
+		return fmt.Errorf(utils.JwtParseErr, err)
 	}
 
 	if !jwtToken.Valid {
-		err = fmt.Errorf("token signature is invalid")
+		err = fmt.Errorf(utils.InvalidSignatureErr, err)
 		return err
 	}
 
