@@ -7,11 +7,8 @@ import (
 	"go.uber.org/fx"
 	"log"
 	"net/http"
+	"strings"
 )
-
-type VerifyParams struct {
-	Token string `json:"token"`
-}
 
 type OAuthController interface {
 	ListTokens(ctx *gin.Context)
@@ -82,14 +79,24 @@ func (c *oAuthController) CreateToken(ctx *gin.Context) {
 }
 
 func (c *oAuthController) VerifyToken(ctx *gin.Context) {
-	var params VerifyParams
-	if err := ctx.BindJSON(&params); err != nil {
-		log.Fatalln(err)
-		ctx.AbortWithStatus(500)
+
+	authHeader := ctx.GetHeader("Authorization")
+	if authHeader == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+		ctx.Abort()
 		return
 	}
 
-	err := c.token.VerifyToken(params.Token)
+	authParts := strings.Split(authHeader, " ")
+	if len(authParts) != 2 || authParts[0] != "Bearer" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header"})
+		ctx.Abort()
+		return
+	}
+
+	tokenString := authParts[1]
+
+	err := c.token.VerifyToken(tokenString)
 	if err != nil {
 		log.Fatalln(err)
 		ctx.AbortWithStatus(500)
