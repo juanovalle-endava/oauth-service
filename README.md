@@ -122,7 +122,7 @@ curl --location --request POST 'localhost:8080/api/token' \
     - Headers:
         - Authorization: Bearer authentication header with a valid token. 
           - This token can be generated from the [create token endpoint](#create-token)
-    - Body: None
+    - Body: JSON representation of the JWT claim information
 - Response:
     - Status Code: 200 OK
 
